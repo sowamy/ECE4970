@@ -3,43 +3,67 @@
 #define MEMORY 0xA0 // Memory Component Address
 
 
-void writeEEPROM( byte data )
+void writeEEPROM()
 {
   
-  Wire.beginTransmission( MEMORY );
-  Wire.write( (int)(0x00 >> 8) );   // MSB
-  Wire.write( (int)(0x00 & 0xFF) ); // LSB
-  Wire.write( data );
+  Wire.beginTransmission( MEMORY | 0x00 );  // Device Address
+  Wire.write( 0x00 ); // First Word Address
+  Wire.write( 0x01 ); // Second Word Address
+  Wire.write( 0x01 ); // Data Word
   Wire.endTransmission();
-
-  delay(5);
 }
 
 byte readEEPROM()
 {
-  byte rdata = 0xFF;
+  byte data = 0xFF;
+  
+  // Random Read
+  // Starts by using a 'Dummy Write'
+  Wire.beginTransmission( MEMORY | 0x00 );  // Device Address
+  Wire.write( 0x00 ); // First Word Address
+  Wire.write( 0x01 ); // Second Word Address
+  // Wire.endTransmission();
+  // Then reads data
+  Wire.beginTransmission( MEMORY | 0x01 );
+  Wire.requestFrom( MEMORY, 2 );
 
-  Wire.beginTransmission( 0xA0 );
-  Wire.write( (int)(0x00 >> 8) );   // MSB
-  Wire.write( (int)(0x00 & 0xFF) ); // LSB
+  data = Wire.read();
+
   Wire.endTransmission();
 
-  Wire.requestFrom( MEMORY, 1 );
+  return data;
+}
 
-  if( Wire.available() ) rdata = Wire.read();
+void get100Addresses( void ) {
+  int i = 0;
+  
+  // 'Dummy Write'
+  Wire.beginTransmission( MEMORY | 0x00 );  // Device Address
+  Wire.write( 0x00 ); // First Word Address
+  Wire.write( 0x01 ); // Second Word Address
 
-  return rdata;
+  Wire.beginTransmission( MEMORY | 0x01 );
+
+  for( i = 0; i < 100; i++ ) {
+    Wire.requestFrom( MEMORY, 2 );
+
+    Serial.print( i );
+    Serial.print( ": " );
+    Serial.println( Wire.read() );
+  }
+  Wire.endTransmission();
 }
 
 void setup() {
   // put your setup code here, to run once:
+  
   Serial.begin( 9600 );
   Wire.begin();
 
-  unsigned int a2 = 0;
-
-  writeEEPROM( 0x50 );
-  Serial.print( readEEPROM() );
+  // Wire.setClock( 10000 );
+  writeEEPROM();
+  Serial.println( readEEPROM() );
+  get100Addresses();
 }
 
 void loop() {
