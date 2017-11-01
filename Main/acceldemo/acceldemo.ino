@@ -8,15 +8,17 @@
 
 SimpleTimer timer;
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
-sensors_event_t event; 
+sensors_event_t event;
+bool dataReady = 0;
 
 void getData( void ) {
   lis.getEvent( &event );
+  dataReady = 1;
 }
 
 void setup(void) {
 
-  timer.setInterval( 100, getData );
+  timer.setInterval( 10, getData );
   
 #ifndef ESP8266
   while (!Serial);     
@@ -33,18 +35,17 @@ void setup(void) {
 }
 
 void loop() {
-      
   timer.run();
-  
-  /* Display the results (acceleration is measured in m/s^2) */
-  Serial.print("|"); 
-  Serial.print(event.acceleration.x);
-  Serial.print("|"); 
-  Serial.print(event.acceleration.y); 
-  Serial.print("|"); 
-  Serial.print(event.acceleration.z); 
-  Serial.println("|");
-  //Serial.println();
- 
-  delay(200); 
+  if(1 == dataReady) {
+    dataReady = 0;
+    //unsigned long millisec = millis();
+    Serial.print("|"); 
+    Serial.print(event.acceleration.x);
+    Serial.print("|"); 
+    Serial.print(event.acceleration.y); 
+    Serial.print("|"); 
+    Serial.print(event.acceleration.z); 
+    Serial.println("|");
+    //Serial.println(millisec);
+  }  
 }
