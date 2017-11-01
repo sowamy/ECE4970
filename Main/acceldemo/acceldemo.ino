@@ -2,12 +2,21 @@
 
 #include <Wire.h>
 #include <SPI.h>
+#include "SimpleTimer.h"
 #include "Adafruit_LIS3DH.h"
 #include "Adafruit_Sensor.h"
 
+SimpleTimer timer;
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
+sensors_event_t event; 
+
+void getData( void ) {
+  lis.getEvent( &event );
+}
 
 void setup(void) {
+
+  timer.setInterval( 100, getData );
   
 #ifndef ESP8266
   while (!Serial);     
@@ -25,8 +34,7 @@ void setup(void) {
 
 void loop() {
       
-  sensors_event_t event; 
-  lis.getEvent(&event);
+  timer.run();
   
   /* Display the results (acceleration is measured in m/s^2) */
   Serial.print("|"); 
