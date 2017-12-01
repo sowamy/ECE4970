@@ -1,6 +1,7 @@
 /*
  * LIS3DH.ino
  * COMMUNICATES WITH A LIS3DH ACCELEROMETER USING I2C
+ * Written by: Angelino Lefevers
  */
 #include <Wire.h>
 #include <SPI.h>
